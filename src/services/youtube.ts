@@ -63,7 +63,12 @@ export async function pollYoutube(): Promise<void> {
         platform: "youtube",
         title: latest.title ?? "New video",
         url,
-        description: `**${sub.channelName}** just posted a new ${isShort ? "short" : "video"} on YouTube!`,
+        vars: {
+          author: sub.channelName,
+          title: latest.title ?? "",
+          url,
+          type: isShort ? "short" : "vidéo",
+        },
         authorName: sub.channelName,
         imageUrl: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
         timestamp: pubDate,

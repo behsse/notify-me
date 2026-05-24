@@ -44,6 +44,14 @@ db.exec(`
     last_video_id TEXT,
     PRIMARY KEY (guild_id, tiktok_user)
   );
+
+  CREATE TABLE IF NOT EXISTS customizations (
+    guild_id TEXT NOT NULL,
+    platform TEXT NOT NULL CHECK (platform IN ('youtube', 'twitch', 'tiktok')),
+    template TEXT,
+    color    INTEGER,
+    PRIMARY KEY (guild_id, platform)
+  );
 `);
 
 export type Platform = "youtube" | "twitch" | "tiktok";
@@ -218,5 +226,44 @@ export const tiktokRepo = {
       `UPDATE tiktok_subs SET last_video_id = ?
        WHERE guild_id = ? AND tiktok_user = ?`,
     ).run(videoId, guildId, tiktokUser.toLowerCase());
+  },
+};
+
+export const customizationRepo = {
+  get(guildId: string, platform: Platform) {
+    return db
+      .prepare(
+        `SELECT template, color
+         FROM customizations WHERE guild_id = ? AND platform = ?`,
+      )
+      .get(guildId, platform) as { template: string | null; color: number | null } | undefined;
+  },
+
+  setTemplate(guildId: string, platform: Platform, template: string) {
+    db.prepare(
+      `INSERT INTO customizations (guild_id, platform, template)
+       VALUES (?, ?, ?)
+       ON CONFLICT(guild_id, platform) DO UPDATE SET template = excluded.template`,
+    ).run(guildId, platform, template);
+  },
+
+  setColor(guildId: string, platform: Platform, color: number) {
+    db.prepare(
+      `INSERT INTO customizations (guild_id, platform, color)
+       VALUES (?, ?, ?)
+       ON CONFLICT(guild_id, platform) DO UPDATE SET color = excluded.color`,
+    ).run(guildId, platform, color);
+  },
+
+  resetTemplate(guildId: string, platform: Platform) {
+    db.prepare(
+      `UPDATE customizations SET template = NULL WHERE guild_id = ? AND platform = ?`,
+    ).run(guildId, platform);
+  },
+
+  resetColor(guildId: string, platform: Platform) {
+    db.prepare(
+      `UPDATE customizations SET color = NULL WHERE guild_id = ? AND platform = ?`,
+    ).run(guildId, platform);
   },
 };

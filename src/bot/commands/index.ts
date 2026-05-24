@@ -1,5 +1,7 @@
 import { Collection, type Interaction } from "discord.js";
 import { client } from "../client.js";
+import { color } from "./color.js";
+import { message } from "./message.js";
 import { setchannel } from "./setchannel.js";
 import { status } from "./status.js";
 import { tiktok } from "./tiktok.js";
@@ -7,7 +9,15 @@ import { twitch } from "./twitch.js";
 import type { SlashCommand } from "./types.js";
 import { youtube } from "./youtube.js";
 
-export const commands: SlashCommand[] = [setchannel, status, youtube, twitch, tiktok];
+export const commands: SlashCommand[] = [
+  setchannel,
+  status,
+  youtube,
+  twitch,
+  tiktok,
+  message,
+  color,
+];
 
 const byName = new Collection<string, SlashCommand>(
   commands.map((c) => [c.data.name, c]),

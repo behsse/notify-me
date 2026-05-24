@@ -1,19 +1,14 @@
 import { EmbedBuilder, type APIEmbed, type TextChannel } from "discord.js";
 import { client } from "./bot/client.js";
-import { channelRepo, type Platform } from "./db/index.js";
-
-const COLORS: Record<Platform, number> = {
-  youtube: 0xff0000,
-  twitch: 0x9146ff,
-  tiktok: 0xfe2c55,
-};
+import { channelRepo, customizationRepo, type Platform } from "./db/index.js";
+import { DEFAULT_COLORS, DEFAULT_TEMPLATES, renderTemplate } from "./services/template.js";
 
 export interface Announcement {
   guildId: string;
   platform: Platform;
   title: string;
   url: string;
-  description?: string;
+  vars: Record<string, string>;
   authorName?: string;
   authorIconUrl?: string;
   thumbnailUrl?: string;
@@ -35,12 +30,17 @@ export async function sendAnnouncement(a: Announcement): Promise<boolean> {
     return false;
   }
 
+  const custom = customizationRepo.get(a.guildId, a.platform);
+  const template = custom?.template ?? DEFAULT_TEMPLATES[a.platform];
+  const color = custom?.color ?? DEFAULT_COLORS[a.platform];
+  const description = renderTemplate(template, a.vars);
+
   const embed = new EmbedBuilder()
-    .setColor(COLORS[a.platform])
+    .setColor(color)
     .setTitle(a.title.slice(0, 256))
     .setURL(a.url);
 
-  if (a.description) embed.setDescription(a.description.slice(0, 4096));
+  if (description) embed.setDescription(description.slice(0, 4096));
   if (a.authorName) {
     embed.setAuthor({ name: a.authorName.slice(0, 256), iconURL: a.authorIconUrl, url: a.url });
   }

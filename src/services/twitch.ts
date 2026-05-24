@@ -31,15 +31,18 @@ export async function pollTwitch(): Promise<void> {
         .replace("{width}", "1280")
         .replace("{height}", "720");
 
+      const streamUrl = `https://twitch.tv/${sub.twitchLogin}`;
       await sendAnnouncement({
         guildId: sub.guildId,
         platform: "twitch",
         title: live.title || `${sub.displayName} is live!`,
-        url: `https://twitch.tv/${sub.twitchLogin}`,
-        description:
-          `🔴 **${sub.displayName}** is **LIVE** on Twitch` +
-          (live.game_name ? ` — playing **${live.game_name}**` : "") +
-          `!`,
+        url: streamUrl,
+        vars: {
+          author: sub.displayName,
+          title: live.title || "",
+          url: streamUrl,
+          game: live.game_name || "Just Chatting",
+        },
         authorName: sub.displayName,
         imageUrl: `${thumb}?_=${Date.now()}`,
         timestamp: new Date(live.started_at),

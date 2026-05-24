@@ -37,17 +37,19 @@ export async function pollTikTok(): Promise<void> {
         continue;
       }
 
-      const description = stripHtml(latest.contentSnippet ?? latest.content ?? "");
       const cover = extractCoverImage(latest.content ?? "");
+      const titleText = latest.title?.toString() ?? "";
 
       await sendAnnouncement({
         guildId: sub.guildId,
         platform: "tiktok",
-        title: latest.title?.toString().slice(0, 256) ?? `New TikTok from @${sub.tiktokUser}`,
+        title: titleText.slice(0, 256) || `New TikTok from @${sub.tiktokUser}`,
         url: link,
-        description: `**@${sub.tiktokUser}** just posted a new TikTok!${
-          description ? `\n\n> ${description.slice(0, 280)}` : ""
-        }`,
+        vars: {
+          author: sub.tiktokUser,
+          title: titleText,
+          url: link,
+        },
         authorName: `@${sub.tiktokUser}`,
         imageUrl: cover ?? undefined,
         timestamp: pubDate,
@@ -71,10 +73,3 @@ function extractCoverImage(html: string): string | null {
   return m?.[1] ?? null;
 }
 
-function stripHtml(s: string): string {
-  return s
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/?[^>]+>/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
