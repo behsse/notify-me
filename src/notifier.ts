@@ -28,7 +28,11 @@ export async function sendAnnouncement(a: Announcement): Promise<boolean> {
   const rendered = renderTemplate(template, a.vars);
 
   const isEveryone = conf.rolePing === a.guildId;
-  const ping = conf.rolePing ? `<@&${conf.rolePing}>` : "";
+  const ping = conf.rolePing
+    ? isEveryone
+      ? "@everyone"
+      : `<@&${conf.rolePing}>`
+    : "";
 
   const parts: string[] = [];
   if (ping) parts.push(ping);

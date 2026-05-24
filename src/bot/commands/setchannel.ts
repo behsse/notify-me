@@ -56,7 +56,11 @@ export const setchannel: SlashCommand = {
 
     channelRepo.set(interaction.guildId, platform, channel.id, role?.id ?? null);
 
-    const roleNote = role ? ` (pings <@&${role.id}>)` : "";
+    const roleNote = role
+      ? role.id === interaction.guildId
+        ? " (pings @everyone)"
+        : ` (pings <@&${role.id}>)`
+      : "";
     await interaction.reply({
       content: `${platformLabel(platform)} announcements will be posted in <#${channel.id}>${roleNote}.`,
       ephemeral: true,
