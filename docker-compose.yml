@@ -1,0 +1,40 @@
+services:
+  rsshub:
+    image: diygod/rsshub:latest
+    container_name: notify-me-rsshub
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: memory
+      CACHE_EXPIRE: 300
+      REQUEST_TIMEOUT: 15000
+    networks:
+      - notify-net
+    # No ports exposed: only the bot talks to it over the internal network.
+    # Uncomment to expose RSSHub on the host (e.g. for debugging):
+    # ports:
+    #   - "127.0.0.1:1200:1200"
+
+  bot:
+    build: .
+    container_name: notify-me-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /data/notify.db
+      RSSHUB_URL: http://rsshub:1200
+    volumes:
+      - notify-data:/data
+    networks:
+      - notify-net
+    depends_on:
+      - rsshub
+
+networks:
+  notify-net:
+    driver: bridge
+
+volumes:
+  notify-data:
+    driver: local
