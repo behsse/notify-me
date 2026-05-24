@@ -97,11 +97,16 @@ export const message: SlashCommand = {
       const custom = customizationRepo.get(guildId, platform);
       const current = custom?.template ?? DEFAULT_TEMPLATES[platform];
       const isCustom = Boolean(custom?.template);
+      const twitchNote =
+        platform === "twitch"
+          ? "\n\n_Pour Twitch, ce texte s'affiche au-dessus de l'embed natif Discord (avec game, viewers et bouton Watch Stream)._"
+          : "";
       await interaction.reply({
         content:
           `**Message ${labelOf(platform)}** ${isCustom ? "(personnalisé)" : "(défaut)"} :\n` +
           `> ${current}\n\n` +
-          `**Placeholders disponibles :** ${AVAILABLE_PLACEHOLDERS[platform].join(", ")}`,
+          `**Placeholders disponibles :** ${AVAILABLE_PLACEHOLDERS[platform].join(", ")}` +
+          twitchNote,
         ephemeral: true,
       });
     }

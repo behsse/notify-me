@@ -7,9 +7,10 @@ import {
 } from "../../services/template.js";
 import type { SlashCommand } from "./types.js";
 
+// Twitch uses Discord's native auto-embed, which forces Twitch's own purple — color customization
+// doesn't apply there, so we omit it from the choices.
 const PLATFORM_CHOICES = [
   { name: "YouTube", value: "youtube" },
-  { name: "Twitch", value: "twitch" },
   { name: "TikTok", value: "tiktok" },
 ] as const;
 

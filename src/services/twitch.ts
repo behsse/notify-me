@@ -27,26 +27,21 @@ export async function pollTwitch(): Promise<void> {
       const isNewStream = sub.lastStreamId !== live.id || sub.isLive === 0;
       if (!isNewStream) continue;
 
-      const thumb = live.thumbnail_url
-        .replace("{width}", "1280")
-        .replace("{height}", "720");
-
       const streamUrl = `https://twitch.tv/${sub.twitchLogin}`;
+      const game = live.game_name || "Just Chatting";
+
       await sendAnnouncement({
         guildId: sub.guildId,
         platform: "twitch",
-        title: live.title || `${sub.displayName} is live!`,
+        title: live.title || `${sub.displayName} est en live !`,
         url: streamUrl,
         vars: {
           author: sub.displayName,
           title: live.title || "",
           url: streamUrl,
-          game: live.game_name || "Just Chatting",
+          game,
         },
-        authorName: sub.displayName,
-        imageUrl: `${thumb}?_=${Date.now()}`,
-        timestamp: new Date(live.started_at),
-        footer: "Twitch",
+        plainMode: true,
       });
 
       twitchRepo.setLive(sub.guildId, sub.twitchLogin, live.id);
