@@ -1,4 +1,4 @@
-import type { TextChannel } from "discord.js";
+import type { MessageMentionTypes, TextChannel } from "discord.js";
 import { client } from "./bot/client.js";
 import { channelRepo, customizationRepo, type Platform } from "./db/index.js";
 import { DEFAULT_TEMPLATES, renderTemplate } from "./services/template.js";
@@ -26,12 +26,21 @@ export async function sendAnnouncement(a: Announcement): Promise<boolean> {
   const custom = customizationRepo.get(a.guildId, a.platform);
   const template = custom?.template ?? DEFAULT_TEMPLATES[a.platform];
   const rendered = renderTemplate(template, a.vars);
+
+  const isEveryone = conf.rolePing === a.guildId;
   const ping = conf.rolePing ? `<@&${conf.rolePing}>` : "";
 
-  const text = [ping, rendered].filter(Boolean).join(" ").trim();
-  const content = text.includes(a.url) ? text : `${text}\n${a.url}`.trim();
+  const parts: string[] = [];
+  if (ping) parts.push(ping);
+  if (rendered) parts.push(rendered);
+  if (!rendered.includes(a.url)) parts.push(a.url);
+  const content = parts.join("\n");
 
-  const allowedMentions = conf.rolePing ? { roles: [conf.rolePing] } : { parse: [] as never[] };
+  const allowedMentions: { parse?: MessageMentionTypes[]; roles?: string[] } = !conf.rolePing
+    ? { parse: [] }
+    : isEveryone
+      ? { parse: ["everyone"] }
+      : { roles: [conf.rolePing] };
 
   try {
     await (channel as TextChannel).send({ content, allowedMentions });

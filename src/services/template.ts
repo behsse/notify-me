@@ -13,5 +13,7 @@ export const AVAILABLE_PLACEHOLDERS: Record<Platform, string[]> = {
 };
 
 export function renderTemplate(template: string, vars: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (_, key: string) => vars[key] ?? "");
+  return template
+    .replace(/\\n/g, "\n")
+    .replace(/\{(\w+)\}/g, (_, key: string) => vars[key] ?? "");
 }

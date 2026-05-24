@@ -97,16 +97,15 @@ export const message: SlashCommand = {
       const custom = customizationRepo.get(guildId, platform);
       const current = custom?.template ?? DEFAULT_TEMPLATES[platform];
       const isCustom = Boolean(custom?.template);
-      const twitchNote =
-        platform === "twitch"
-          ? "\n\n_Pour Twitch, ce texte s'affiche au-dessus de l'embed natif Discord (avec game, viewers et bouton Watch Stream)._"
-          : "";
+      const note =
+        "\n\n_Astuce : utilise `\\n` pour un saut de ligne dans ton template._" +
+        "\n_Le ping de rôle et l'URL sont automatiquement ajoutés sur leur propre ligne._";
       await interaction.reply({
         content:
           `**Message ${labelOf(platform)}** ${isCustom ? "(personnalisé)" : "(défaut)"} :\n` +
-          `> ${current}\n\n` +
+          `> ${current.replace(/\n/g, "\n> ")}\n\n` +
           `**Placeholders disponibles :** ${AVAILABLE_PLACEHOLDERS[platform].join(", ")}` +
-          twitchNote,
+          note,
         ephemeral: true,
       });
     }
