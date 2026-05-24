@@ -12,6 +12,13 @@ export const db = new Database(config.DATABASE_PATH);
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 
+function ensureColumn(table: string, column: string, definition: string) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS guild_channels (
     guild_id   TEXT NOT NULL,
@@ -53,6 +60,9 @@ db.exec(`
     PRIMARY KEY (guild_id, platform)
   );
 `);
+
+ensureColumn("twitch_subs", "user_id", "TEXT");
+ensureColumn("twitch_subs", "profile_image_url", "TEXT");
 
 export type Platform = "youtube" | "twitch" | "tiktok";
 
@@ -135,13 +145,28 @@ export const youtubeRepo = {
 };
 
 export const twitchRepo = {
-  add(guildId: string, twitchLogin: string, displayName: string) {
+  add(
+    guildId: string,
+    twitchLogin: string,
+    displayName: string,
+    userId: string | null = null,
+    profileImageUrl: string | null = null,
+  ) {
     db.prepare(
-      `INSERT INTO twitch_subs (guild_id, twitch_login, display_name)
-       VALUES (?, ?, ?)
+      `INSERT INTO twitch_subs (guild_id, twitch_login, display_name, user_id, profile_image_url)
+       VALUES (?, ?, ?, ?, ?)
        ON CONFLICT(guild_id, twitch_login) DO UPDATE SET
-         display_name = excluded.display_name`,
-    ).run(guildId, twitchLogin.toLowerCase(), displayName);
+         display_name = excluded.display_name,
+         user_id = COALESCE(excluded.user_id, twitch_subs.user_id),
+         profile_image_url = COALESCE(excluded.profile_image_url, twitch_subs.profile_image_url)`,
+    ).run(guildId, twitchLogin.toLowerCase(), displayName, userId, profileImageUrl);
+  },
+
+  updateUserInfo(guildId: string, twitchLogin: string, userId: string, profileImageUrl: string) {
+    db.prepare(
+      `UPDATE twitch_subs SET user_id = ?, profile_image_url = ?
+       WHERE guild_id = ? AND twitch_login = ?`,
+    ).run(userId, profileImageUrl, guildId, twitchLogin.toLowerCase());
   },
 
   remove(guildId: string, twitchLogin: string) {
@@ -166,7 +191,9 @@ export const twitchRepo = {
                 twitch_login as twitchLogin,
                 display_name as displayName,
                 last_stream_id as lastStreamId,
-                is_live as isLive
+                is_live as isLive,
+                user_id as userId,
+                profile_image_url as profileImageUrl
          FROM twitch_subs`,
       )
       .all() as {
@@ -175,6 +202,8 @@ export const twitchRepo = {
       displayName: string;
       lastStreamId: string | null;
       isLive: number;
+      userId: string | null;
+      profileImageUrl: string | null;
     }[];
   },
 
