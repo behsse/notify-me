@@ -50,7 +50,7 @@ export async function pollTwitch(): Promise<void> {
         embed: {
           title: live.title || `${sub.displayName} est en live !`,
           color: TWITCH_COLOR,
-          authorName: `${sub.displayName} est en live sur Twitch !`,
+          authorName: sub.displayName,
           authorIconUrl: sub.profileImageUrl ?? undefined,
           imageUrl: `${thumb}?_=${Date.now()}`,
           fields: [
