@@ -58,7 +58,7 @@ export const twitch: SlashCommand = {
           await interaction.editReply(`No Twitch user named \`${username}\`.`);
           return;
         }
-        twitchRepo.add(guildId, user.login, user.display_name, user.id, user.profile_image_url);
+        twitchRepo.add(guildId, user.login, user.display_name);
         await interaction.editReply(
           `Tracking **${user.display_name}** (\`${user.login}\`). Live announcements will fire when they go online.`,
         );

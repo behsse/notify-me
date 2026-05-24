@@ -37,23 +37,15 @@ export async function pollTikTok(): Promise<void> {
         continue;
       }
 
-      const cover = extractCoverImage(latest.content ?? "");
-      const titleText = latest.title?.toString() ?? "";
-
       await sendAnnouncement({
         guildId: sub.guildId,
         platform: "tiktok",
-        title: titleText.slice(0, 256) || `New TikTok from @${sub.tiktokUser}`,
         url: link,
         vars: {
           author: sub.tiktokUser,
-          title: titleText,
+          title: latest.title?.toString() ?? "",
           url: link,
         },
-        authorName: `@${sub.tiktokUser}`,
-        imageUrl: cover ?? undefined,
-        timestamp: pubDate,
-        footer: "TikTok",
       });
 
       tiktokRepo.setLastVideo(sub.guildId, sub.tiktokUser, videoId);
@@ -67,9 +59,3 @@ function extractTiktokVideoId(url: string): string | null {
   const m = url.match(/\/video\/(\d+)/);
   return m?.[1] ?? null;
 }
-
-function extractCoverImage(html: string): string | null {
-  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return m?.[1] ?? null;
-}
-

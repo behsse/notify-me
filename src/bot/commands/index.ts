@@ -1,6 +1,5 @@
 import { Collection, type Interaction } from "discord.js";
 import { client } from "../client.js";
-import { color } from "./color.js";
 import { message } from "./message.js";
 import { setchannel } from "./setchannel.js";
 import { status } from "./status.js";
@@ -16,7 +15,6 @@ export const commands: SlashCommand[] = [
   twitch,
   tiktok,
   message,
-  color,
 ];
 
 const byName = new Collection<string, SlashCommand>(

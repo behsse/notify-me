@@ -9,18 +9,11 @@ interface YoutubeFeedItem {
   pubDate?: string;
   isoDate?: string;
   author?: string;
-  "media:group"?: {
-    "media:thumbnail"?: { $: { url: string } }[] | { $: { url: string } };
-    "media:description"?: string[] | string;
-  };
 }
 
 const parser = new Parser<{}, YoutubeFeedItem>({
   customFields: {
-    item: [
-      ["yt:videoId", "videoId"],
-      ["media:group", "media:group", { keepArray: false }],
-    ],
+    item: [["yt:videoId", "videoId"]],
   },
   timeout: 15_000,
 });
@@ -61,7 +54,6 @@ export async function pollYoutube(): Promise<void> {
       await sendAnnouncement({
         guildId: sub.guildId,
         platform: "youtube",
-        title: latest.title ?? "New video",
         url,
         vars: {
           author: sub.channelName,
@@ -69,10 +61,6 @@ export async function pollYoutube(): Promise<void> {
           url,
           type: isShort ? "short" : "vidéo",
         },
-        authorName: sub.channelName,
-        imageUrl: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-        timestamp: pubDate,
-        footer: "YouTube",
       });
 
       youtubeRepo.setLastVideo(sub.guildId, sub.youtubeChannelId, videoId);

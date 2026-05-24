@@ -33,7 +33,6 @@ export async function pollTwitch(): Promise<void> {
       await sendAnnouncement({
         guildId: sub.guildId,
         platform: "twitch",
-        title: live.title || `${sub.displayName} est en live !`,
         url: streamUrl,
         vars: {
           author: sub.displayName,
@@ -41,7 +40,6 @@ export async function pollTwitch(): Promise<void> {
           url: streamUrl,
           game,
         },
-        plainMode: true,
       });
 
       twitchRepo.setLive(sub.guildId, sub.twitchLogin, live.id);
