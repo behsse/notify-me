@@ -53,7 +53,6 @@ export async function pollTwitch(): Promise<void> {
           authorName: `${sub.displayName} est en live sur Twitch !`,
           authorIconUrl: sub.profileImageUrl ?? undefined,
           imageUrl: `${thumb}?_=${Date.now()}`,
-          timestamp: new Date(live.started_at),
           fields: [
             { name: "Game", value: game, inline: true },
             { name: "Viewers", value: live.viewer_count.toString(), inline: true },
